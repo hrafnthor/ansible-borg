@@ -1,6 +1,6 @@
 borg:
   install: standalone
-  version: latest
+  version: "1.4.2"
   os: linux
   architecture: x86_64
   glibc: 231
