@@ -8,9 +8,9 @@
 
   - name: Ensure borg is present
     fail:
-      msg: "Expected to find package 'borg' in package list!"
+      msg: "Expected to find package 'borgbackup' in package list!"
     when:
-      - "'borg' not in ansible_facts.packages"
+      - "'borgbackup' not in ansible_facts.packages"
 
   - name: Ensure borg is executable
     command: borg --version
