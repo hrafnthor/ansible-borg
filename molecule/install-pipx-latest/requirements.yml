@@ -1,7 +1,7 @@
 roles:
   - name: hth-pipx
     src: https://github.com/hrafnthor/ansible-pipx.git
-    version: "0.0.1"
+    version: "0.0.2"
 collections:
   - name: ansible.utils
   - name: community.general
