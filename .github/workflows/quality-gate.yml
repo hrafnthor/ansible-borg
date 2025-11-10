@@ -1,0 +1,50 @@
+name: quality-gate
+
+on:
+  # allow manual triggering of action
+  workflow_dispatch:
+
+  # Allow other workflows to invoke this workflow
+  workflow_call:
+
+  pull_request:
+    branches:
+      - "main"
+
+  push:
+    tags:
+      - '*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+
+    - name: Install Molecule
+      run: |
+        pip install -U pip setuptools wheel
+        pip install ansible ansible-lint molecule molecule-plugins[docker]
+
+    - name: Test install latest distribution version
+      run: molecule  test --scenario-name install-distribution-latest -- --extra-vars "@../../molecule/install-distribution-latest/input-data.yml"
+
+    - name: Test install specific distribution version
+      run: molecule  test --scenario-name install-distribution-version -- --extra-vars "@../../molecule/install-distribution-version/input-data.yml"
+
+    - name: Test install latest pipx version
+      run: molecule test --scenario-name install-pipx-latest -- --extra-vars "@../../molecule/install-pipx-latest/input-data.yml"
+
+    - name: Test install specific pipx version
+      run: molecule test --scenario-name install-pipx-version -- --extra-vars "@../../molecule/install-pipx-version/input-data.yml"
+
+    - name: Test install latest standalone linux version
+      run: molecule test --scenario-name install-standalone-latest -- --extra-vars "@../../molecule/install-standalone-latest/input-data.yml"
+
+    - name: Test install specific standalone linux version
+      run: molecule test --scenario-name install-standalone-version -- --extra-vars "@../../molecule/install-standalone-version/input-data.yml"

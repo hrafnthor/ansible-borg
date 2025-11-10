@@ -1,0 +1,7 @@
+borg:
+  install: standalone
+  version: "1.4.2"
+  os: linux
+  architecture: x86_64
+  glibc: 231
+  checksum: "sha256:8a100a084d5cf0ce17f888e203ab487abfb4859a722fa6f4b4a9ad3c201753ec"
