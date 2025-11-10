@@ -1,0 +1,17 @@
+- name: "HTH | Borg | Install pipx build dependencies"
+  ansible.builtin.package:
+    name: "{{ dependency }}"
+    state: latest
+  loop: "{{ borg.dependencies }}"
+  loop_control:
+    loop_var: dependency
+  when:
+    - borg.dependencies is defined
+
+- name: "HTH | Borg | Install via pipx"
+  community.general.pipx:
+    name: "{{ hth_borg_default_package_name + ('==' + borg.version if (borg.version is defined) else '') }}"
+    executable: "{{ borg.pipx_path | default(omit) }}"
+    state: "{{ 'absent' if (borg.remove is defined and borg.remove) else 'present' if (borg.version is defined) else 'latest' }}"
+    force: "{{ borg.force | default(omit) }}"
+    global: true

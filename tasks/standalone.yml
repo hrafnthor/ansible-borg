@@ -1,0 +1,86 @@
+- name: "HTH | Borg | Look up supported architecture for 'os'"
+  ansible.builtin.set_fact:
+    hth_borg_os_architecture: "{{ hth_borg_default_os_architecture_map[borg.os] }}"
+  when:
+    - borg.remove is not defined or not borg.remove
+
+- name: "HTH | Borg | Fail on unsupported architecture for 'os'"
+  ansible.builtin.fail:
+    msg: "Architecture '{{ borg.architecture }}' is not supported for operating system '{{ borg.os }}'!"
+  when:
+    - borg.remove is not defined or not borg.remove
+    - borg.architecture not in hth_borg_os_architecture
+
+- name: "HTH | Borg | Set artifact name"
+  ansible.builtin.set_fact:
+    hth_borg_artifact_name: "borg-{{ borg.os }}{{ '-glibc' + borg.glibc | string if (borg.glibc is defined) else '' }}-{{ borg.architecture }}"
+
+- name: "HTH | Borg | Query for latest version"
+  ansible.builtin.uri:
+    url: "https://github.com/borgbackup/borg/releases/latest"
+    method: GET
+    follow_redirects: none
+    status_code: 302
+  register: hth_borg_latest_redirect
+  when:
+    - borg.version is not defined or borg.version == 'latest'
+
+- name: "HTH | Borg | Extract latest version code"
+  ansible.builtin.set_fact:
+    hth_borg_latest_version: "{{ hth_borg_latest_redirect.location | urlsplit('path') | regex_replace('.*/', '') }}"
+  when:
+    - borg.version is not defined or borg.version == 'latest'
+
+- name: "HTH | Borg | Set requested version code"
+  ansible.builtin.set_fact:
+    hth_borg_requested_version: "{{ hth_borg_latest_version | default(borg.version) }}"
+
+- name: "HTH | Borg | Set destination path"
+  ansible.builtin.set_fact:
+    hth_borg_version_path: "{{ hth_borg_default_destination_path }}/{{ hth_borg_requested_version }}"
+
+- name: "HTH | Borg | Ensure destination path"
+  ansible.builtin.file:
+    path: "{{ hth_borg_version_path }}"
+    owner: "{{ hth_borg_default_destination_owner }}"
+    group: "{{ hth_borg_default_destination_group }}"
+    mode: "{{ hth_borg_default_destination_mode }}"
+    state: directory
+  when:
+    - borg.remove is not defined or not borg.remove
+
+- name: "HTH | Borg | Set version artifact destination path"
+  ansible.builtin.set_fact:
+    hth_borg_version_artifact_path: "{{ hth_borg_version_path }}/{{ hth_borg_artifact_name }}"
+
+- name: "HTH | Borg | Check for pre-existing version"
+  ansible.builtin.stat:
+    path: "{{ hth_borg_version_artifact_path }}"
+  register: hth_borg_version_artifact_stat
+
+- block:
+
+  - name: "HTH | Borg | Construct artifact url"
+    ansible.builtin.set_fact:
+      hth_borg_version_artifact_url: "https://github.com/borgbackup/borg/releases/download/{{ hth_borg_requested_version }}/{{ hth_borg_artifact_name }}"
+    when:
+      - not hth_borg_version_artifact_stat.stat.exists
+
+  - name: "HTH | Borg | Download artifact"
+    ansible.builtin.get_url:
+      url: "{{ hth_borg_version_artifact_url }}"
+      dest: "{{ hth_borg_version_artifact_path }}"
+      checksum: "{{ borg.checksum }}"
+    when:
+      - not hth_borg_version_artifact_stat.stat.exists
+
+- name: "HTH | Borg | Symlink version to path"
+  ansible.builtin.file:
+    src: "{{ hth_borg_version_artifact_path }}"
+    dest: "{{ hth_borg_default_symlink_path }}/{{ hth_borg_default_executable_name }}"
+    owner: "{{ hth_borg_default_symlink_owner }}"
+    group: "{{ hth_borg_default_symlink_group }}"
+    mode: "{{ hth_borg_default_symlink_mode }}"
+    state: link
+  when:
+    - borg.add_to_path is undefined or borg.add_to_path

@@ -1,0 +1,20 @@
+galaxy_info:
+  author: Hrafn Thorvaldsson
+  description: An Ansible role for managing Borg installation
+  company: hth
+
+  license: Apache2
+
+  role_name: ansible_borg
+  namespace: ansible_borg
+
+  min_ansible_version: 2.14
+
+  platforms:
+    - name: Ubuntu
+
+  galaxy_tags:
+    - borg
+    - backups
+
+dependencies: []

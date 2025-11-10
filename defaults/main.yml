@@ -1,0 +1,37 @@
+# Default name of the borg backup package.
+hth_borg_default_package_name: "borgbackup"
+
+# Default name of the borg executable. Is used when symlinking standalone installations to path.
+hth_borg_default_executable_name: "borg"
+
+# Default path to where versions of borgbackup will be placed.
+hth_borg_default_destination_path: "/opt/borg"
+
+# Default owner of the destination path when installing standalone versions.
+hth_borg_default_destination_owner: "root"
+
+# Default group owner of the destination path when installing standalone versions.
+hth_borg_default_destination_group: "root"
+
+# Default mode of the destination path when installing standalone versions.
+hth_borg_default_destination_mode: "0755"
+
+# Default path to where the default version of borgbackup will be symlinked when installing standalone versions.
+hth_borg_default_symlink_path: "/usr/bin"
+
+# Default owner of the path symlink when installing standalone versions.
+hth_borg_default_symlink_owner: "root"
+
+# Default group owner of the path symlink when installing standalone versions.
+hth_borg_default_symlink_group: "root"
+
+# Default mode of the path symlink when installing standalone versions.
+hth_borg_default_symlink_mode: "0755"
+
+# Default map of supported architectures and operating systems.
+# Used during standalone installation.
+hth_borg_default_os_architecture_map:
+  linux: ["x86_64", "arm64"]
+  macos-13: ["x86_64"]
+  macos-14: ["arm64"]
+  freebsd-14: ["x86_64"]

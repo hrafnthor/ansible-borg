@@ -1,0 +1,25 @@
+- name: "HTH | Borg | Validate input variable"
+  ansible.utils.validate:
+    data: "{{ borg }}"
+    criteria: "{{ lookup('file', 'assertions/borg-criteria.json') | from_json }}"
+    engine: ansible.utils.jsonschema
+  when:
+    - borg is defined
+
+- name: "HTH | Borg | Install via distribution package manager"
+  ansible.builtin.package:
+    name: "{{ hth_borg_default_package_name + '=' + borg.version if (borg.version is defined and borg.version != 'latest') else hth_borg_default_package_name }}"
+    state:  "{{ 'absent' if (borg.remove is defined and borg.remove) else 'present' if borg.version is defined and borg.version != 'latest' else 'latest' }}"
+  when:
+    - borg is defined
+    - borg.install == 'distribution'
+
+- ansible.builtin.include_tasks: pipx.yml
+  when:
+    - borg is defined
+    - borg.install == 'pipx'
+
+- ansible.builtin.include_tasks: standalone.yml
+  when:
+    - borg is defined
+    - borg.install == 'standalone'

@@ -1,0 +1,17 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+
+  - name: Gather package facts
+    package_facts:
+
+  - name: Ensure borg is present
+    fail:
+      msg: "Expected to find package 'borg' in package list!"
+    when:
+      - "'borg' not in ansible_facts.packages"
+
+  - name: Ensure borg is executable
+    command: borg --version
+    changed_when: false

@@ -1,0 +1,144 @@
+{
+    "title": "borg",
+    "description": "schema for Borg configuration",
+    "type": "object",
+    "properties":
+    {
+        "remove":
+        {
+            "description": "Will cause the role to attempt to remove the package via the installation method defined in 'install'.",
+            "type": "boolean"
+        },
+        "force": {
+            "description": "Will cause the role to attempt to force install the requested version of the package.",
+            "type": "boolean"
+        },
+        "install":
+        {
+            "description": "Defines the method by which the package will be installed.",
+            "type": "string",
+            "enum":
+            [
+                "pipx",
+                "distribution",
+                "standalone"
+            ]
+        },
+        "pipx_path":
+        {
+            "description": "The path to the pipx executable. This is only needed if pipx cannot be run as a module via 'python3 -m pipx'.",
+            "$ref": "#/definitions/non-empty-string"
+        },
+        "dependencies":
+        {
+            "description": "A list of native dependencies that will be installed prior to attempting to install via pipx.",
+            "$ref": "#/definitions/non-empty-string-array"
+        },
+        "version":
+        {
+            "description": "The version of the package that should be installed. If omitted, the latest version is installed.",
+            "$ref": "#/definitions/non-empty-string"
+        },
+        "checksum":
+        {
+            "description": "The checksum of the standalone binary artifact being downloaded. Is only used if 'install' is set to 'standalone'.",
+            "$ref": "#/definitions/non-empty-string"
+        },
+        "add_to_path":
+        {
+            "description": "Indicates that the downloaded artifact should be symlinked to path. Is only used if 'install' is set to 'standalone'.",
+            "type": "boolean"
+        },
+        "os":
+        {
+            "description": "The operating system to download binaries for. Only used if 'install' is set to 'standalone'.",
+            "type": "string",
+            "enum":
+            [
+                "linux",
+                "macos-13",
+                "macos-14",
+                "freebsd-14"
+            ]
+        },
+        "architecture":
+        {
+            "description": "The architecture to download standalone binaries for. Only used if 'install' is set to 'standalone'.",
+            "type": "string",
+            "enum":
+            [
+                "x86_64",
+                "arm64"
+            ]
+        },
+        "glibc":
+        {
+            "description": "The glibc version to download standalone binaries for. Only used if 'install' is set to 'standalone', and if 'os' is set to 'linux'.",
+            "type": "integer",
+            "minValue": 231
+        }
+    },
+    "required":
+    [
+        "install"
+    ],
+    "if":
+    {
+        "properties":
+        {
+            "install":
+            {
+                "const": "standalone"
+            }
+        }
+    },
+    "then":
+    {
+        "if":
+        {
+            "properties":
+            {
+                "os":
+                {
+                    "const": "linux"
+                }
+            }
+        },
+        "then":
+        {
+            "required":
+            [
+                "checksum",
+                "os",
+                "architecture",
+                "glibc"
+            ]
+        },
+        "else":
+        {
+            "required":
+            [
+                "checksum",
+                "os",
+                "architecture"
+            ]
+        }
+    },
+    "definitions":
+    {
+        "non-empty-string":
+        {
+            "type": "string",
+            "minLength": 1
+        },
+        "non-empty-string-array":
+        {
+            "type": "array",
+            "minItems": 1,
+            "items":
+            {
+                "$ref": "#/definitions/non-empty-string"
+            }
+        }
+    }
+}
